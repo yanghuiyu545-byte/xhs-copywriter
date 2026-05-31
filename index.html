@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>小红书文案生成器</title>
+  <meta name="description" content="AI驱动的小红书文案生成工具，输入产品名一键生成种草文案">
+  <meta name="keywords" content="小红书文案生成器,小红书文案,种草文案,AI写文案,营销文案生成">
+  <meta property="og:title" content="小红书文案生成器 - AI一键生成种草文案">
+  <meta property="og:description" content="输入产品名，AI自动生成5条小红书风格营销文案。支持产品种草、促销冲量、品牌故事三种风格，电商卖家必备工具。">
+  <meta property="og:type" content="website">
+  <link rel="stylesheet" href="style.css">
+  <script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
+</head>
+<body>
+  <div id="app">
+    <header>
+      <h1>📝 小红书文案生成器</h1>
+      <p class="subtitle">输入产品名，一键生成种草文案</p>
+    </header>
+
+    <main>
+      <!-- 输入区域 -->
+      <section class="input-area">
+        <div class="input-group">
+          <input
+            type="text"
+            v-model="productName"
+            placeholder="输入产品名或关键词，如：氨基酸洗面奶"
+            @keyup.enter="generate"
+          >
+          <button @click="generate" :disabled="generating" class="btn-primary">
+            <span v-if="generating">⏳ 生成中...</span>
+            <span v-else>✨ 生成文案</span>
+          </button>
+        </div>
+
+        <div class="advanced-toggle" @click="showAdvanced = !showAdvanced">
+          📎 更多选项（{{ showAdvanced ? '收起 ∧' : '展开 ∨' }}）
+        </div>
+        <div class="advanced-options" v-show="showAdvanced">
+          <label>
+            产品卖点（选填）
+            <input type="text" v-model="sellingPoint" placeholder="如：温和不刺激，敏感肌可用">
+          </label>
+          <fieldset>
+            <legend>文案风格</legend>
+            <label v-for="style in styles" :key="style.value">
+              <input type="radio" v-model="selectedStyle" :value="style.value">
+              {{ style.label }}
+            </label>
+          </fieldset>
+          <fieldset>
+            <legend>目标人群（可多选）</legend>
+            <label v-for="aud in audiences" :key="aud">
+              <input type="checkbox" v-model="selectedAudiences" :value="aud">
+              {{ aud }}
+            </label>
+          </fieldset>
+        </div>
+
+        <div class="quota-info">
+          今日剩余：<strong>{{ remainingQuota }}</strong> / {{ dailyLimit }} 次
+        </div>
+      </section>
+
+      <!-- 错误提示 -->
+      <section class="error-area" v-if="errorMsg">
+        <div class="error-card">
+          <p>{{ errorMsg }}</p>
+          <button @click="errorMsg = ''" class="btn-dismiss">✕</button>
+        </div>
+      </section>
+
+      <!-- 结果区域 -->
+      <section class="results-area" v-if="results.length > 0">
+        <h2>生成结果 · {{ productName }}</h2>
+        <div class="result-card" v-for="(text, i) in results" :key="i">
+          <div class="result-text">{{ text }}</div>
+          <button @click="copy(text, i)" class="btn-copy">
+            {{ copiedIndex === i ? '✅ 已复制' : '📋 复制' }}
+          </button>
+        </div>
+        <button @click="generate" :disabled="generating" class="btn-secondary">
+          🔄 重新生成
+        </button>
+      </section>
+
+      <!-- 付费提示 -->
+      <section class="paywall" v-if="quotaExhausted">
+        <div class="paywall-card">
+          <h3>⚠️ 今日免费次数已用完</h3>
+          <p>升级会员 <strong>9.9元/月</strong>，无限生成</p>
+          <button disabled class="btn-locked">🔒 立即开通（即将上线）</button>
+        </div>
+      </section>
+    </main>
+
+    <footer>
+      <p>由 DeepSeek AI 驱动 · 内容仅供参考</p>
+    </footer>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
